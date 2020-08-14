@@ -20,7 +20,7 @@
 Option explicit     ' Variables must be defined first
 Option Default none ' all variables must be specified
 
-Option base 0       ' Array Index starts with 0 
+Option base 0       ' Array Index starts with 0
 ' ------------------------------------------------------------
 
 ' global definition and constants
@@ -78,12 +78,12 @@ Const interval  = 100
 Dim integer gloop
 
 ' trigger the start of new submarines
-Dim integer trigger_sub         ' decrement each game loop
-Dim integer trigger_sub_init    ' init value to start new counter
-Const TRIGGER_SUB_MAX = 60	' global init value
+Dim integer trigger_sub       ' decrement each game loop. <0 -> start
+Dim integer trigger_sub_init  ' init value to start new counter
+Const TRIGGER_SUB_MAX = 60	  ' global init value
 
 ' trigger the torpedo launch
-Dim integer trigger_torp
+Dim integer trigger_torp      ' if <0 launch new torpedo
 Dim integer trigger_torp_init
 Const TRIGGER_TORP_MAX = 100 	' global init value
 Dim integer torpedos_fired
@@ -91,7 +91,7 @@ Dim integer torpedos_fired
 Dim integer bomb_fired
 
 ' what is the game's status?
-' can be init, show about, game run, etc.
+' can be init, show about, running, etc.
 Dim integer game_status         ' the game status
 
 ' Const GSTATUS = ... hmm: new, init, about, running
@@ -119,6 +119,11 @@ Const DEST_STARTX	= 400
 Const DEST_STARTY	= GSCRN_STATUS_SIZE+GSCRN_SURFACE_SIZE
 const MAX_SPEED         = 3	' maximum speed of destroyer/subs
 
+' different speed vectors of objects
+const SPEED1 = 1
+const SPEED2 = 2
+const SPEED3 = 3
+
 ' Keyboard Definitions
 ' movement.
 ' 0 =  no move
@@ -126,7 +131,14 @@ const MAX_SPEED         = 3	' maximum speed of destroyer/subs
 '  1 = move right
 Dim integer key_move	= 0
 Dim integer key_fire	= 0
-Dim integer key_current
+Dim integer key_current = 0
+
+
+
+' ------------------------------------------------------------
+' Start of program code section
+' ------------------------------------------------------------
+
 
 ' ------------------------------------------------------------
 Sub do_initGrafix
@@ -165,17 +177,18 @@ local integer yy
   for i=0 to MAX_SUB
     obj_sub(i,IDX_COND) = COND_FREE
     ' each sub has it's own depth -> do not collide
-    yy = GSCRN_OCEAN_SIZE / (MAX_SUB + 3) ' add 3: 
+    yy = GSCRN_OCEAN_SIZE / (MAX_SUB + 3) ' add 3:
     obj_sub(i,IDX_Y) = (i + 2) * yy
 
-    'little fun: subs are faster, if depth is lower
-    dx = 1
-    if (i < MAX_SUB/3)       THEN dx = 3
-    if (i < (2 * MAX_SUB)/3) THEN dx = 2
+    ' little fun: subs are faster, if depth is lower
+    ' or speed is random??
+    dx = SPEED1
+    if (i < MAX_SUB/3)       THEN dx = SPEED3
+    if (i < (2 * MAX_SUB)/3) THEN dx = SPEED2
     obj_sub(i,IDX_DX) = dx
 
     ' left/right
-    if ((i MOD 2) = 0) THEN 
+    if ((i MOD 2) = 0) THEN
       obj_sub(i,IDX_DX) = dx
     else
       obj_sub(i,IDX_DX) = -dx
@@ -295,10 +308,27 @@ End Sub
 
 ' ------------------------------------------------------------
 Sub do_activateBomb
+local integer i
+
+  for i=0 to MAX_BOMB
+    if (obj_bomb[i,IDX_COND] = COND_FREE) then  ' if slot is free, throw new bomb
+      ' water bomb is released at destroyers position
+      obj_bomb[i,IDX_COND] = COND_OK
+      obj_bomb[i,IDX_X] = obj_dest[IDX_X]
+      obj_bomb[i,IDX_Y] = obj_dest[IDX_Y] + 16  '? check initial depth
+      obj_bomb[i,IDX_DX] = SPEED1
+      exit sub                      ' terminate subroutine
+    endif
+  next i
 End Sub
 
 ' ------------------------------------------------------------
 Sub do_moveBomb
+local integer i
+
+  for i=0 to MAX_BOMB
+    if (obj_bomb[i,IDX_COND])
+  next i
 End Sub
 
 
@@ -343,4 +373,3 @@ Sub do_game
   do_Paint
 End Sub
 ' ------------------------------------------------------------
-
