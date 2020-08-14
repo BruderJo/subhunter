@@ -5,9 +5,9 @@ You are captain of the CMM2, a glorious destroyer.
 
 Your orders: Hunt and destroy alle enemy submarines
 
-you control the destroyer ship with your curoser keys (left/right)
+you control the destroyer ship with your curser keys (left/right)
 A water bomb is dropped with <SPC>
- The submarines will fire torpedos. Avoid being hit.
+The submarines will fire torpedos. Avoid being hit.
 
 
 This is a static screen, single player game.
