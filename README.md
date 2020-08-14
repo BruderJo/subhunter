@@ -4,6 +4,11 @@ A game for the Colour Maximite 2
 You are captain of the CMM2, a glorious destroyer.
 Your orders: Hunt and destroy alle enemy submarines
 
+you control the destroyer ship with your curoser keys (left/right)
+A water bomb is dropped with <SPC>
+ The submarines will fire torpedos. Avoid being hit.
+ 
+ 
 This is a static screen, single player game.
 
 I am currently devoloping the code, game design and graphics while waiting for my Colour Maximite 2.
@@ -23,6 +28,23 @@ Project Status:
  0% | Sound
 
 
+The game is planned to look similar like this
+
 ```
- Screen
++----------------------------------------------+
+!  Score: 00000 Highscore: 00000  Time: 00:00  !
+!                                              !
+!                   <####>                     !
+!----------------------------------------------!
+!                                              !
+!                      *                ^      !
+!  ====>                *                      !
+!                       *         ^            !
+!                                <====         !
+!                    ^                         !
+!                  ====>                       !
+!                                              !
+!                                              !
++----------------------------------------------+
+
 ```
