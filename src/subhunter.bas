@@ -90,13 +90,19 @@ Dim integer torpedos_fired
 
 Dim integer bomb_fired
 
+Const TRIGGER_VISIBLE_MAX = 5   ' how many loops is an explosion visible?
+
 ' what is the game's status?
 ' can be init, show about, running, etc.
 Dim integer game_status         ' the game status
 
 ' Const GSTATUS = ... hmm: new, init, about, running
 
+
+
 Dim integer score, highscore    ' the score values
+Const DELTA_SCORE = 10          ' ten points per hit
+
 
 ' Y-Size of graphic areas on screen
 ' assuming mode is 640x400
@@ -107,6 +113,10 @@ Const GSCRN_STATUS_SIZE  = 24	' Status line, Text font 2 has 20px high
 Const GSCRN_SURFACE_SIZE = 60	' surface area
 Const GSCRN_BOTTOM_SIZE  = 16	' ground level
 Const GSCRN_OCEAN_SIZE   = 300	' the ocean area (=400-24-60-16)
+' graphics y pos of ocean area start
+Dim integer GSCRN_OCEAN_START = GSCRN_STATUS_SIZE + GSCRN_SURFACE_SIZE
+
+Const MAXY_BOMB = 360   'max depth of water bombs before removed
 
 ' Color set
 Const GSCRN_STATUS_COL  = ORANGE
@@ -123,6 +133,11 @@ const MAX_SPEED         = 3	' maximum speed of destroyer/subs
 const SPEED1 = 1
 const SPEED2 = 2
 const SPEED3 = 3
+
+' distance between object to calculate hit/no hit
+' e.g. torpedo -> ship, water bomb -> submarine
+const DELTA_X = 10
+const DELTA_Y = 10
 
 ' Keyboard Definitions
 ' movement.
@@ -177,8 +192,11 @@ local integer yy
   for i=0 to MAX_SUB
     obj_sub(i,IDX_COND) = COND_FREE
     ' each sub has it's own depth -> do not collide
+    ' with screen res 400 -> ocean has 300 pixel -> delta_y = 27'
+    ' add 3 means: from top ocean surface have two levels free'
+    ' subs are ypos 138..354
     yy = GSCRN_OCEAN_SIZE / (MAX_SUB + 3) ' add 3:
-    obj_sub(i,IDX_Y) = (i + 2) * yy
+    obj_sub[i,IDX_Y] = GSCRN_OCEAN_START + (i + 2) * yy
 
     ' little fun: subs are faster, if depth is lower
     ' or speed is random??
@@ -324,10 +342,30 @@ End Sub
 
 ' ------------------------------------------------------------
 Sub do_moveBomb
-local integer i
+local integer i,j,ddx,ddy
 
   for i=0 to MAX_BOMB
-    if (obj_bomb[i,IDX_COND])
+    if (obj_bomb[i,IDX_COND] = COND_OK) then   'is there a bomb?
+      ' the bomb dives
+      obj_bomb[i,IDX_Y] = obj_bomb[i,IDX_Y] + obj_bomb[i,IDX_DY]
+      ' if bomb dives below max y, then it is lost
+      if (obj_bomb[i,IDX_Y] >= MAXY_BOMB) then
+        ' bomb hits nothing, remove and free slot
+        obj_bomb[i,IDX_COND] = COND_FREE
+      endif
+
+      ' check hit condition and loop a submarines
+      for j=0 to MAX_SUB
+        ddx = abs(obj_sub[j,IDX_X] - obj_bomb[i,IDX_X])
+        ddy = abs(obj_sub[j,IDX_Y] - obj_bomb[i,IDX_Y])
+        if (ddx < DELTA_X) and (ddy < DELTA_Y) then   ' hit
+          obj_bomb[i,IDX_COND] = COND_FREE            ' remove bomb
+          obj_sub[j,IDX_COND]  = COND_HIT
+          obj_sub[j,IDX_CNT]   = TRIGGER_VISIBLE_MAX
+          score = score + DELTA_SCORE;
+        endif
+      next j
+    endif
   next i
 End Sub
 
