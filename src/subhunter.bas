@@ -314,14 +314,62 @@ End Sub
 
 ' ------------------------------------------------------------
 Sub do_moveSubmarine
+  local integer i
+
+  for i=0 to MAX_SUB                            ' loop all submarines
+    if (obj_sub[i,IDX_COND] = COND_OK) then     ' alive?
+      if (obj_sub[i,IDX_DX] < 0) then           ' move to left?
+        ' add speed to x position
+        obj_sub[i,IDX_X] = obj_sub[i,IDX_X] + obj_sub[i,IDX_DX]
+        if (obj_sub[i,IDX_X] < 0) then
+          obj_sub[i,IDX_COND] = COND_FREE       ' sub passed, free slot
+        endif
+      else                                      ' move to right
+        ' add speed to x position
+        obj_sub[i,IDX_X] = obj_sub[i,IDX_X] + obj_sub[i,IDX_DX]
+        if (obj_sub[i,IDX_X] > MAXX) then
+          obj_sub[i,IDX_COND] = COND_FREE       ' sub passed, free slot
+        endif
+      endif
+      if (trigger_torp <= 0) then
+        do_activateTorpedo i
+      endif
+    elsif (obj_sub[i,IDX_COND] = COND_HIT then
+
+    endif
+  next i
 End Sub
 
 ' ------------------------------------------------------------
-Sub do_activateTorpedo
+Sub do_activateTorpedo (n%)
+' n% = Submarine firing'
+local integer i
+
+  ' if the sub is too close to the screen edges, do not launch a torpedo
+  if (obj_sub[n%,IDX_X] < 20)      then exit sub
+  if (obj_sub[n%,IDX_X] > MAXX-20) then exit sub
+
+  ' select next possible slot
+  for i=0 to MAX_TORP
+    if (obj_torp[i,IDX_COND] = COND_FREE) then
+      ' free slot found, activate it
+      ' assign start values
+      obj_torp[i,IDX_COND] = COND_OK
+      obj_torp[i,IDX_SPR]  = SPRITE_TORP
+      obj_torp[i,IDX_X]    = obj_sub[n%,IDX_X]
+      obj_torp[i,IDX_Y]    = obj_sub[n%,IDX_Y]
+      obj_torp[i,IDX_DY]   = SPEED3
+      exit sub
+    endif
+  next i
 End Sub
 
 ' ------------------------------------------------------------
 Sub do_moveTorpedo
+' loop torpedos
+' move upwards
+' check if destroyer hit
+' or torpedo reached surface
 End Sub
 
 ' ------------------------------------------------------------
@@ -334,7 +382,7 @@ local integer i
       obj_bomb[i,IDX_COND] = COND_OK
       obj_bomb[i,IDX_X] = obj_dest[IDX_X]
       obj_bomb[i,IDX_Y] = obj_dest[IDX_Y] + 16  '? check initial depth
-      obj_bomb[i,IDX_DX] = SPEED1
+      obj_bomb[i,IDX_DY] = SPEED1
       exit sub                      ' terminate subroutine
     endif
   next i
