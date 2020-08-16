@@ -30,6 +30,8 @@ Project Status:
 
 
 The game is planned to look similar like this
+Screensize = 640x400
+Sprites = 32x32   (i need a sprite editor)
 
 ```
 +----------------------------------------------+
