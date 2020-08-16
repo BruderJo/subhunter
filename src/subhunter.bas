@@ -25,6 +25,11 @@ Option base 0       ' Array Index starts with 0
 
 ' global definition and constants
 
+
+' ------------------------------------------------------------
+' Object Definitions
+' ------------------------------------------------------------
+
 ' how many objects can exist
 Const MAXBOMB  =  5 ' Water bombs
 Const MAXSUB   =  8 ' Submarines
@@ -69,9 +74,11 @@ Const SPRITE_EXPL  = 7   ' image explosion
 Const interval  = 100
 
 
+' ------------------------------------------------------------
+' Global game control definitions
+
 ' initialize game variables
 '
-
 ' the game loop counter
 ' controls all activities
 ' increased after each 'interval'
@@ -92,6 +99,16 @@ Dim integer bomb_fired
 
 Const TRIGGER_VISIBLE_MAX = 5   ' how many loops is an explosion visible?
 
+' different speed vectors of objects
+const SPEED1 = 1
+const SPEED2 = 2
+const SPEED3 = 3
+
+' distance between object to calculate hit/no hit
+' e.g. torpedo -> ship, water bomb -> submarine
+const DELTA_X = 10
+const DELTA_Y = 10
+
 ' what is the game's status?
 ' can be init, show about, running, etc.
 Dim integer game_status         ' the game status
@@ -103,6 +120,9 @@ Dim integer game_status         ' the game status
 Dim integer score, highscore    ' the score values
 Const DELTA_SCORE = 10          ' ten points per hit
 
+
+' ------------------------------------------------------------
+' Graphics and screen control
 
 ' Y-Size of graphic areas on screen
 ' assuming mode is 640x400
@@ -129,15 +149,9 @@ Const DEST_STARTX	= 400
 Const DEST_STARTY	= GSCRN_STATUS_SIZE+GSCRN_SURFACE_SIZE
 const MAX_SPEED         = 3	' maximum speed of destroyer/subs
 
-' different speed vectors of objects
-const SPEED1 = 1
-const SPEED2 = 2
-const SPEED3 = 3
 
-' distance between object to calculate hit/no hit
-' e.g. torpedo -> ship, water bomb -> submarine
-const DELTA_X = 10
-const DELTA_Y = 10
+' ------------------------------------------------------------
+' Game interface aka Keyboard
 
 ' Keyboard Definitions
 ' movement.
@@ -291,6 +305,7 @@ End Sub
 
 ' ------------------------------------------------------------
 Sub do_activate_sub
+'   ----------------------------------------------------------
   local integer i
 
   trigger_sub = trigger_sub - 1
@@ -314,6 +329,7 @@ End Sub
 
 ' ------------------------------------------------------------
 Sub do_moveSubmarine
+'   ----------------------------------------------------------
   local integer i
 
   for i=0 to MAX_SUB                            ' loop all submarines
@@ -342,6 +358,7 @@ End Sub
 
 ' ------------------------------------------------------------
 Sub do_activateTorpedo (n%)
+'   ----------------------------------------------------------
 ' n% = Submarine firing'
 local integer i
 
@@ -366,14 +383,43 @@ End Sub
 
 ' ------------------------------------------------------------
 Sub do_moveTorpedo
+'   ----------------------------------------------------------
 ' loop torpedos
 ' move upwards
 ' check if destroyer hit
 ' or torpedo reached surface
+  local integer i
+  local integer ddx,ddy
+
+  for i=0 to MAX_TORP
+    ' if active torpedo, move up
+    if obj_torp[i,IDX_COND] = COND_OK then
+      obj_torp[i,IDX_Y] = obj_torp[i,IDX_Y] - obj_torp[i,IDX_DY]
+      ' if depth = surface? check if torpedo missed the ship
+      if (obj_torp[i,IDX_Y] < GSCREEN_OCEAN_START then
+        obj_torp[i,IDX_Y] = GSCREEN_OCEAN_START         ' torpedos do no fly
+        obj_torp[i,IDX_COND] = COND_HIT                 ' torp is destroyed
+        obj_torp[i,IDX_CNT]  = TRIGGER_VISIBLE_MAX
+        ddx = abs(obj_torp[j,IDX_X] - obj_dest[IDX_X])
+        ddy = abs(obj_torp[j,IDX_Y] - obj_dest[IDX_Y])
+        if (ddx < DELTA_X) and (ddy < DELTY_Y) then     ' destroyer in range?
+          obj_dest[IDX_COND] = COND_HIT
+          obj_dest[IDX_CNT]  = TRIGGER_VISIBLE_MAX
+        endif
+      endif
+    elsif obj_torp[i,IDX_COND] = COND_HIT then
+      obj_torp[j,IDX_CNT] = obj_torp[j,IDX_CNT] - 1
+      if (obj_torp[j,IDX_CNT]) < 0 then
+        obj_torp[j,IDX_COND] = COND_FREE
+      endif
+    endif
+  next i
+
 End Sub
 
 ' ------------------------------------------------------------
 Sub do_activateBomb
+'   ----------------------------------------------------------
 local integer i
 
   for i=0 to MAX_BOMB
@@ -390,6 +436,7 @@ End Sub
 
 ' ------------------------------------------------------------
 Sub do_moveBomb
+'   ----------------------------------------------------------
 local integer i,j,ddx,ddy
 
   for i=0 to MAX_BOMB
@@ -421,6 +468,7 @@ End Sub
 
 ' ------------------------------------------------------------
 Sub do_moveDestroyer
+'   ----------------------------------------------------------
 
   if (obj_dest(IDX_COND)=COND_OK) then
     if (obj_dest(IDX_DX) < 0) then ' move left
@@ -459,3 +507,7 @@ Sub do_game
   do_Paint
 End Sub
 ' ------------------------------------------------------------
+
+do_game
+
+end
