@@ -532,20 +532,21 @@ Sub do_game
 '   ----------------------------------------------------------
 
   do
-    if (game_status = GINIT) then       ' init game
+    select case game_status
+    case GINIT                          ' init game
       do_initGame
       game_status = GWAIT
 
-    elsif (game_status = GWAIT) then    ' wait for keypressed
+    case GWAIT                          ' wait for keypressed
       do_aboutScreen
       if (key_fire > 0) then
         game_status = GSTART
       endif
 
-    elsif (game_status = GSTART) then   ' key pressed, prepare the game run
+    case GSTART                         ' key pressed, prepare the game run
       do_resetGame
 
-    elsif (game_status = GRUN) then     ' active game
+    case GRUN                           ' active game
       if (score > highscore) then highscore = score
 
       trigger_sub = trigger_sub - 1
@@ -559,10 +560,13 @@ Sub do_game
       do_moveBomb
       do_moveTorpedo
 
-    elsif (game_status = GEND) then     ' destroyer hit, wait for next game or exit
+    case GEND                           ' destroyer hit, wait for next game or exit
       game_status = GWAIT
-    endif
 
+    case else                           ' "should" never happen
+      game_status = GINIT
+
+    end select
     gloop = gloop + 1
 
   loop until (game_status = GEXIT)
