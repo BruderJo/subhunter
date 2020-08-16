@@ -69,10 +69,6 @@ Const SPRITE_TORP  = 6   ' image torpedo
 Const SPRITE_EXPL  = 7   ' image explosion
 
 
-' delay between each game loop
-' timer value in ms
-Const interval  = 100
-
 
 ' ------------------------------------------------------------
 ' Global game control definitions
@@ -84,6 +80,11 @@ Const interval  = 100
 ' controls all activities
 ' increased after each 'interval'
 Dim integer gloop
+
+' delay between each game loop
+' timer value in ms
+Const interval  = 100
+
 
 ' trigger the start of new submarines
 Dim integer trigger_sub       ' decrement each game loop. <0 -> start
@@ -523,6 +524,14 @@ Sub do_moveDestroyer
 End Sub
 ' ------------------------------------------------------------
 
+' ------------------------------------------------------------
+' Keyboard function
+' manage all user activities
+'   ----------------------------------------------------------
+Sub do_readKeyboard
+'   ----------------------------------------------------------
+' manage keyboard
+end sub
 
 ' ------------------------------------------------------------
 ' Main Game Loop
@@ -559,6 +568,7 @@ Sub do_game
       do_moveSubmarine
       do_moveBomb
       do_moveTorpedo
+      do_Paint
 
     case GEND                           ' destroyer hit, wait for next game or exit
       game_status = GWAIT
@@ -569,12 +579,18 @@ Sub do_game
     end select
     gloop = gloop + 1
 
+    pause interval
+
   loop until (game_status = GEXIT)
-  do_Paint
+
 End Sub
 ' ------------------------------------------------------------
 
 game_status = GINIT
+' initiate a routine to read the keyboard
+settick 100,do_readKeyboard
 do_game
 
+' disable timer'
+settick 0,0
 end
