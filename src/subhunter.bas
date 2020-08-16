@@ -76,6 +76,7 @@ Const interval  = 100
 
 ' ------------------------------------------------------------
 ' Global game control definitions
+' ------------------------------------------------------------
 
 ' initialize game variables
 '
@@ -177,10 +178,6 @@ Sub do_initGrafix
 End Sub
 ' ------------------------------------------------------------
 
-' ------------------------------------------------------------
-
-' ------------------------------------------------------------
-
 
 ' ------------------------------------------------------------
 ' Initialize all game object attributes
@@ -279,18 +276,48 @@ Function do_Random (n%) as integer
 end Function
 ' ------------------------------------------------------------
 
+' ------------------------------------------------------------
+' init a new game loop
+' for full reset see initGame()
+'   ----------------------------------------------------------
+Sub do_resetGame
+'   ----------------------------------------------------------
+
+  torpedos_fired = 0
+  score = 0
+  gloop = 0
+  trigger_sub_init = TRIGGER_SUB_MAX
+  trigger_sub      = trigger_sub_init
+
+  do_ResetObjects
+
+End Sub
+' ------------------------------------------------------------
+
+' ------------------------------------------------------------
+' First time initialization of the game
 '   ----------------------------------------------------------
 Sub do_initGame
 '   ----------------------------------------------------------
   do_initGrafix
-  do_ResetObjects
-
-  torpedos_fired = 0
-  score = 0
+  do_resetGame
   highscore = 0
+End Sub
+' ------------------------------------------------------------
+
+' ------------------------------------------------------------
+' Show information and howto
+'   ----------------------------------------------------------
+Sub do_aboutScreen
+'   ----------------------------------------------------------
+
+  ' Display a Title
+  ' and
+  ' show usable keys (move, fire, exit game)
 
 End Sub
 ' ------------------------------------------------------------
+
 
 ' ------------------------------------------------------------
 ' Paint
@@ -304,56 +331,24 @@ End Sub
 ' ------------------------------------------------------------
 
 ' ------------------------------------------------------------
-Sub do_activate_sub
+Sub do_activateSubmarine
 '   ----------------------------------------------------------
   local integer i
 
-  trigger_sub = trigger_sub - 1
-  if (trigger_sub < 0) then	' threshold, launch new submarine
-    trigger_sub = trigger_sub_init
-    i = do_Random(MAX_SUB)	' choose a random slot
-    if (obj_sub(i,IDX_COND) = COND_FREE) then	' slot is free ..
-      obj_sub(i,IDX_COND) = COND_OK
-      ' now assign start position
-      if (obj_sub(i,IDX_DX) < 0) THEN	' sub moves right->left
-        obj_sub(i,IDX_X) = MAXX
-        obj_sub(i,IDX_SPR) = SPRITE_SUBL
-      else				' sub moves left->right
-        obj_sub(i,IDX_X) = MINX
-        obj_sub(i,IDX_SPR) = SPRITE_SUBR
-      end if
-    end if
+  trigger_sub = trigger_sub_init
+  i = do_Random(MAX_SUB)	              ' choose a random slot
+  if (obj_sub(i,IDX_COND) = COND_FREE) then	' slot is free ..
+    obj_sub(i,IDX_COND) = COND_OK
+    ' now assign start position
+    if (obj_sub(i,IDX_DX) < 0) THEN	    ' sub moves right->left
+      obj_sub(i,IDX_X) = MAXX
+      obj_sub(i,IDX_SPR) = SPRITE_SUBL
+    else				                        ' sub moves left->right
+      obj_sub(i,IDX_X) = MINX
+      obj_sub(i,IDX_SPR) = SPRITE_SUBR
+    endif
   endif
 
-End Sub
-
-' ------------------------------------------------------------
-Sub do_moveSubmarine
-'   ----------------------------------------------------------
-  local integer i
-
-  for i=0 to MAX_SUB                            ' loop all submarines
-    if (obj_sub[i,IDX_COND] = COND_OK) then     ' alive?
-      if (obj_sub[i,IDX_DX] < 0) then           ' move to left?
-        ' add speed to x position
-        obj_sub[i,IDX_X] = obj_sub[i,IDX_X] + obj_sub[i,IDX_DX]
-        if (obj_sub[i,IDX_X] < 0) then
-          obj_sub[i,IDX_COND] = COND_FREE       ' sub passed, free slot
-        endif
-      else                                      ' move to right
-        ' add speed to x position
-        obj_sub[i,IDX_X] = obj_sub[i,IDX_X] + obj_sub[i,IDX_DX]
-        if (obj_sub[i,IDX_X] > MAXX) then
-          obj_sub[i,IDX_COND] = COND_FREE       ' sub passed, free slot
-        endif
-      endif
-      if (trigger_torp <= 0) then
-        do_activateTorpedo i
-      endif
-    elsif (obj_sub[i,IDX_COND] = COND_HIT then
-
-    endif
-  next i
 End Sub
 
 ' ------------------------------------------------------------
@@ -377,6 +372,38 @@ local integer i
       obj_torp[i,IDX_Y]    = obj_sub[n%,IDX_Y]
       obj_torp[i,IDX_DY]   = SPEED3
       exit sub
+    endif
+  next i
+End Sub
+
+' ------------------------------------------------------------
+Sub do_moveSubmarine
+'   ----------------------------------------------------------
+  local integer i
+
+  for i=0 to MAX_SUB                            ' loop all submarines
+    if (obj_sub[i,IDX_COND] = COND_OK) then     ' alive?
+      if (obj_sub[i,IDX_DX] < 0) then           ' move to left?
+        ' add speed to x position
+        obj_sub[i,IDX_X] = obj_sub[i,IDX_X] + obj_sub[i,IDX_DX]
+        if (obj_sub[i,IDX_X] < 0) then
+          obj_sub[i,IDX_COND] = COND_FREE       ' sub passed, free slot
+        endif
+      else                                      ' move to right
+        ' add speed to x position
+        obj_sub[i,IDX_X] = obj_sub[i,IDX_X] + obj_sub[i,IDX_DX]
+        if (obj_sub[i,IDX_X] > MAXX) then
+          obj_sub[i,IDX_COND] = COND_FREE       ' sub passed, free slot
+        endif
+      endif
+
+      ' is it time to fire a torpedo?
+      if (trigger_torp <= 0) then
+        do_activateTorpedo i
+        trigger_torp = trigger_torp_init
+      endif
+    elsif (obj_sub[i,IDX_COND] = COND_HIT then
+
     endif
   next i
 End Sub
@@ -503,11 +530,47 @@ End Sub
 '   ----------------------------------------------------------
 Sub do_game
 '   ----------------------------------------------------------
-  game main functions
+
+  do
+    if (game_status = GINIT) then       ' init game
+      do_initGame
+      game_status = GWAIT
+
+    elsif (game_status = GWAIT) then    ' wait for keypressed
+      do_aboutScreen
+      if (key_fire > 0) then
+        game_status = GSTART
+      endif
+
+    elsif (game_status = GSTART) then   ' key pressed, prepare the game run
+      do_resetGame
+
+    elsif (game_status = GRUN) then     ' active game
+      if (score > highscore) then highscore = score
+
+      trigger_sub = trigger_sub - 1
+      if (trigger_sub < 0) then       ' threshold, launch new submarine
+        trigger_sub = trigger_sub_init
+        do_activateSubmarine
+      endif
+
+      do_moveDestroyer
+      do_moveSubmarine
+      do_moveBomb
+      do_moveTorpedo
+
+    elsif (game_status = GEND) then     ' destroyer hit, wait for next game or exit
+      game_status = GWAIT
+    endif
+
+    gloop = gloop + 1
+
+  loop until (game_status = GEXIT)
   do_Paint
 End Sub
 ' ------------------------------------------------------------
 
+game_status = GINIT
 do_game
 
 end
