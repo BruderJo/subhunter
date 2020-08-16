@@ -1,25 +1,29 @@
 # Subhunter
 A game for the Colour Maximite 2
 
+<br>
+
 You are captain of the CMM2, a glorious destroyer.
 
 Your orders: Hunt and destroy alle enemy submarines
 
-you control the destroyer ship with your curser keys (left/right)
+You control the destroyer ship with your curser keys (left/right)
 
-A water bomb is dropped with SPACE.
+A water bomb is dropped with \<SPACE>.
 
 The submarines will fire torpedos. Avoid being hit.
 
+<br>
 
 This is a static screen, single player game.
 
 I am currently devoloping the code, game design and graphics while waiting for my Colour Maximite 2.
 Hopefully it arrived end of this month.
 But nevertheless, I use the time to develop this little game and learn how this computer works.
-learning by doing :-)
 
-fyi:
+after all those years - basic again :-)
+
+<br>
 
 Project Status:
 
