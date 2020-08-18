@@ -3,7 +3,7 @@
 '
 ' ------------------------------------------------------------
 ' !!!!!   W O R K   I N   P R O G R E S S   !!!!!
-' This is not a function code
+' This code cannot run. It has errors and is incomplete.
 ' The game is under development
 ' But I want to show the progress
 ' ------------------------------------------------------------
@@ -125,6 +125,7 @@ Const DELTA_SCORE = 10          ' ten points per hit
 
 ' ------------------------------------------------------------
 ' Graphics and screen control
+' ------------------------------------------------------------
 
 ' Y-Size of graphic areas on screen
 ' assuming mode is 640x400
@@ -154,6 +155,7 @@ const MAX_SPEED         = 3	' maximum speed of destroyer/subs
 
 ' ------------------------------------------------------------
 ' Game interface aka Keyboard
+' ------------------------------------------------------------
 
 ' Keyboard Definitions
 ' movement.
