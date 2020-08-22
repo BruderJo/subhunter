@@ -30,8 +30,8 @@ Project Status:
 % done | Tasks
 -------|----------
 75% | Game design planning
-10% | Coding
-10% | Graphics
+30% | Coding
+20% | Graphics
  0% | Sound
 
 Screensize = 640x400
@@ -41,7 +41,7 @@ Sprites = 32x32   (i need a sprite editor)
 
 The game is planned to look similar like this
 
-![Game Background](background_preview.png)
+![Game Background](https://raw.githubusercontent.com/BruderJo/subhunter/master/Background_preview.png)
 
 ```
 +----------------------------------------------+
